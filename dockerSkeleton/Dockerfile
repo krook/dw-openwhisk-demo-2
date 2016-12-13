@@ -24,7 +24,7 @@ RUN mkdir -p /actionProxy
 ADD actionproxy.py /actionProxy/
 
 RUN mkdir -p /action
-ADD parse-check-with-ocr.sh /action/exec
+ADD parse-image.sh /action/exec
 RUN chmod +x /action/exec
 
 ADD tessdata /usr/share/tesseract-ocr/tessdata/

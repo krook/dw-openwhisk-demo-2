@@ -24,39 +24,49 @@ echo "Current namespace is $CURRENT_NAMESPACE."
 
 function install() {
   echo "Binding package"
-  $WSK package bind /whisk.system/cloudant checks \
-  -p username "$CLOUDANT_USER" \
-  -p password "$CLOUDANT_PASS" \
-  -p host "$CLOUDANT_USER.cloudant.com"
+  $WSK package bind /whisk.system/cloudant "$CLOUDANT_INSTANCE" \
+    --param username "$CLOUDANT_USERNAME" \
+    --param password "$CLOUDANT_PASSWORD" \
+    --param host "$CLOUDANT_USERNAME.cloudant.com"
 
   echo "Creating triggers"
   $WSK trigger create new-check-deposit \
-    --feed /$CURRENT_NAMESPACE/checks/changes \
     --param dbname "incoming-checks" \
-    --param includeDocs true
+    --feed "$CLOUDANT_INSTANCE/changes"
 
   echo "Creating actions"
-  $WSK action create process-check actions/process-checks.js \
-    -p CLOUDANT_USER "$CLOUDANT_USER" \
-    -p CLOUDANT_PASS "$CLOUDANT_PASS" \
-    -p CURRENT_NAMESPACE "$CURRENT_NAMESPACE"
-  $WSK action create --docker parse-image krook/parse-image
+  $WSK action create process-check actions/process-check.js \
+    --param CLOUDANT_USERNAME "$CLOUDANT_USERNAME" \
+    --param CLOUDANT_PASSWORD "$CLOUDANT_PASSWORD" \
+    --param CURRENT_NAMESPACE "$CURRENT_NAMESPACE"
+
+  $WSK action create cloudant-sequence \
+    --sequence /$CURRENT_NAMESPACE/$CLOUDANT_INSTANCE/read,process-check
+
+  docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
+  sh -c "cd dockerSkeleton && ./buildAndPush.sh $DOCKER_USERNAME/parse-image"
+  $WSK action create --docker parse-image $DOCKER_USERNAME/parse-image
 
   echo "Enabling rule"
-  $WSK rule create process-check new-check-deposit process-check
+  $WSK rule create deposit-check new-check-deposit cloudant-sequence
 }
 
 function uninstall() {
-  $WSK rule disable invoke-periodically
-  $WSK rule delete invoke-periodically
-  $WSK trigger delete every-20-seconds
-  $WSK action delete handler
+  $WSK rule disable deposit-check
+  $WSK rule delete deposit-check
+  $WSK trigger delete new-check-deposit
+  $WSK action delete process-check
+  $WSK action delete parse-image
+  $WSK action delete cloudant-sequence
+  $WSK package delete "$CLOUDANT_INSTANCE"
 }
 
 function showenv() {
   echo CLOUDANT_INSTANCE=$CLOUDANT_INSTANCE
-  echo CLOUDANT_USER=$CLOUDANT_USER
-  echo CLOUDANT_PASS=$CLOUDANT_PASS
+  echo CLOUDANT_USERNAME=$CLOUDANT_USERNAME
+  echo CLOUDANT_PASSWORD=$CLOUDANT_PASSWORD
+  echo DOCKER_USERNAME=$DOCKER_USERNAME
+  echo DOCKER_PASSWORD=$DOCKER_PASSWORD
 }
 
 case "$1" in
