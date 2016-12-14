@@ -5,6 +5,12 @@ When an image is added to a Cloudant database, it triggers the JavaScript action
 
 ![High level diagram](images/demo-2.png)
 
+1. Image uploaded to Cloudant
+2. Trigger fired in OpenWhisk
+3. JavaScript action parses image metadata and transforms image
+4. Docker action parses image with OCR
+5. Extracted info stored back to Cloudant
+
 ## JavaScript Action `process-check.js`
 This action is invoked by the `new-check-deposit` trigger, which fires when an image of a check is added to a Cloudant database (named `incoming-checks`). The action downloads the image, invokes the `parse-image.js` action to extract account information, resizes the image, then stores a copy back in another Cloudant database (named `processed-checks`) along with the account data.
 
