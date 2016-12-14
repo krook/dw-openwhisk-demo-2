@@ -68,49 +68,47 @@ function main(params) {
 
       // Copy and resize the file to a smaller version.
       function (check, callback) {
-        console.log("Creating resized image.");
-        incomingDb.attachment.get(check._id, check._id).pipe(fs.createWriteStream('check.jpg'));
-        gm('check.jpg').resize(150).write('small-check.jpg', function (err) {
-          return callback(err);
-        });
-        return callback(null, check);
-      },
-
-      // Open file to memory and send it to the next function.
-      function (check, callback) {
-        console.log("Opening file");
-        fs.readFile('small-check.jpg', function(err, data) {
-          if (err) {
-            console.log("Error reading file.");
-            return callback(err);
+        console.log(check);
+        console.log("Creating resized image from ", check._id);
+        incomingDb.attachment.get(check._id, check._id, function(err, body) {
+          if (!err) {
+            console.log("Buffering downloaded file.");
+            gm(body).resize(150).toBuffer('JPG', function (err, buffer) {
+              if (!err) {
+                console.log("Success downloading and resizing.");
+                return callback(null, check, buffer);
+              } else {
+                console.log("Error reading or resizing file.");
+                return callback(err);
+              }
+            });
           } else {
-            console.log("Success reading file.");
-            return callback(null, check, data);
+            console.log("Error downloading file.");
+            return callback(err);
           }
         });
       },
 
       // Insert data into the processed database.
-      function (check, data, callback) {
+      function (check, buffer, callback) {
         console.log('[process-check.main] Inserting into the processed database');
         console.log(check);
+        console.log(buffer);
 
         processedDb.multipart.insert(
-          {
-            _id: check._id,
-            fromAccount: check.fromAccount,
-            routingNumber: check.routingNumber,
-            toAccount: check.toAccount,
-            amount: check.amount
-          },
+          check,
           [
             {
               name: check._id,
-              data: data, content_type:
-              'image/jpg'
+              data: buffer,
+              content_type: 'image/jpg'
             }
           ],
+          check._id,
           function (err, body, head) {
+            console.log('err', err);
+            console.log('body', body);
+            console.log('head', head);
             if (err) {
               console.log('[process-check.main] error: processedDb');
               console.log(err);

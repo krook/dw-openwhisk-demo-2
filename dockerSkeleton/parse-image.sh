@@ -23,7 +23,7 @@ CLOUDANT_DATABASE=`cat params.json | jq -r '.CLOUDANT_DATABASE'`
 IMAGE_ID=`cat params.json | jq -r '.IMAGE_ID'`
 
 # Download the image from Cloudant.
-curl -v -s -X GET -o imgData \
+curl -s -X GET -o imgData \
 "https://$CLOUDANT_USERNAME:$CLOUDANT_PASSWORD@$CLOUDANT_USERNAME.cloudant.com/$CLOUDANT_DATABASE/$IMAGE_ID/$IMAGE_ID?attachments=true&include_docs=true"
 
 # Extract the account number and routing number as text by parsing for MICR font values.
