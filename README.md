@@ -28,14 +28,14 @@ After you've installed the `wsk` binary, created a Cloudant service instance, an
 ```
 
 ### Install the `wsk` CLI from Bluemix
-After registering for [Bluemix](http://bluemix.net/), navigate to the "[OpenWhisk](https://console.ng.bluemix.net/openwhisk/)" section. You'll find it in the left navigation, under the three horizontal bar (hamburger icon).
+After registering for [Bluemix](http://bluemix.net/), navigate to the "[OpenWhisk](https://console.ng.bluemix.net/openwhisk/)" section. You'll find it in the left navigation, under the three horizontal bar (hamburger) icon.
 
-Click the "Download OpenWhisk CLI" button and place the `wsk` binary in your path, such as in `~/bin`. Open a terminal and set your namespace and authorization as shown in step 2. Then create your first action in step 3.
+Click the "Download OpenWhisk CLI" button and place the `wsk` binary in your path, such as in `~/bin`. Open a terminal and set your namespace and authorization as shown in step 2. Then create your first action in step 3 to validate your setup.
 
 ### Set up Cloudant database in Bluemix
 Under the "Services" option in the left navigation, choose "Data & Analytics", then view the Services portfolio and provision an instance of Cloudant. Save the "Service Credentials" information to `local.env` and launch the dashboard.
 
-In the dashboard, create two databases: `incoming-checks` and `processed-checks`.
+In the Cloudant dashboard, create two databases: `incoming-checks` and `processed-checks`.
 
 ### Install Docker for Mac (or your platform of choice)
 The `deploy.sh` script assumes that you have Docker in your path and that you have a Docker Hub account. Install Docker for your platform and sign up for a Docker Hub account. Enter the credentials in `local.env`.
