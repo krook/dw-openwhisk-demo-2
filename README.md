@@ -1,5 +1,5 @@
 # dw-openwhisk-demo-2
-A demo highlighting OpenWhisk polyglot application development. This example shows how to write actions in JavaScript and Docker, respond to database triggers, and invoke other actions asynchronously.
+A demo highlighting OpenWhisk polyglot application development. This example shows how to write actions in both JavaScript and Docker, respond to database triggers, and invoke actions in a workflow asynchronously.
 
 When an image is added to a Cloudant database, this event triggers the JavaScript action to download the file and resize it. It also invokes an optical character recognition library packaged as an action in Docker.
 
