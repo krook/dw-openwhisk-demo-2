@@ -1,7 +1,7 @@
 # dw-openwhisk-demo-2
 A demo highlighting OpenWhisk polyglot application development. This example shows how to write actions in JavaScript and Docker, respond to database triggers, and invoke other actions asynchronously.
 
-When an image is added to a Cloudant database, it triggers the JavaScript action to download the file and resize it. It also invokes an optical character recognition library packaged as an action in Docker.
+When an image is added to a Cloudant database, this event triggers the JavaScript action to download the file and resize it. It also invokes an optical character recognition library packaged as an action in Docker.
 
 ![High level diagram](images/demo-2.png)
 
@@ -20,7 +20,7 @@ This action is invoked by the `process-check.js` action above. The action downlo
 ## Running the demo
 There is a convenience script for creating and destroying the actions, triggers, and rules. It retrieves configuration information from a `local.env` file that is created from `template.local.env`.
 
-After you've installed the `wsk` binary, created a Cloudant services, and installed Docker for your platform, the script can then be used to set up, tear down, and see the current configuration:
+After you've installed the `wsk` binary, created a Cloudant service instance, and installed Docker for your platform, the script can then be used to set up, tear down, and inspect the current configuration:
 ```bash
 ./deploy.sh --install
 ./deploy.sh --uninstall
