@@ -36,26 +36,26 @@ var gm = require('gm').subClass({
  */
 function main(params) {
 
-    // Configure database connections.
-    console.log(params);
-    var cloudant = new Cloudant({
-      account:  params.CLOUDANT_USERNAME,
-      password: params.CLOUDANT_PASSWORD
-    });
-    var incomingDb = cloudant.db.use('incoming-checks');
-    var processedDb = cloudant.db.use('processed-checks');
+  // Configure database connections.
+  console.log(params);
+  var cloudant = new Cloudant({
+    account: params.CLOUDANT_USERNAME,
+    password: params.CLOUDANT_PASSWORD
+  });
+  var incomingDb = cloudant.db.use('incoming-checks');
+  var processedDb = cloudant.db.use('processed-checks');
 
-    var tokens = params._id.split('^');
-    var check = {};
-    check._id = params._id;
-    check.toAccount = tokens[0];
-    check.amount = tokens[1];
+  var tokens = params._id.split('^');
+  var check = {};
+  check._id = params._id;
+  check.toAccount = tokens[0];
+  check.amount = tokens[1];
 
-    // Could also use promises to manage the sequence of async functions.
-    async.waterfall([
+  // Could also use promises to manage the sequence of async functions.
+  async.waterfall([
 
       // Call the OCR action. Reads image and returns fromAccount, routingNumber.
-      function (callback) {
+      function(callback) {
         console.log('[process-check.main] Executing OCR parse of check');
         asyncCallOcrParseAction("/" + params.CURRENT_NAMESPACE + "/parse-image",
           params.CLOUDANT_USERNAME,
@@ -67,13 +67,13 @@ function main(params) {
       },
 
       // Copy and resize the file to a smaller version.
-      function (check, callback) {
+      function(check, callback) {
         console.log(check);
         console.log("Creating resized image from ", check._id);
         incomingDb.attachment.get(check._id, check._id, function(err, body) {
           if (!err) {
             console.log("Buffering downloaded file.");
-            gm(body).resize(150).toBuffer('JPG', function (err, buffer) {
+            gm(body).resize(150).toBuffer('JPG', function(err, buffer) {
               if (!err) {
                 console.log("Success downloading and resizing.");
                 return callback(null, check, buffer);
@@ -90,22 +90,18 @@ function main(params) {
       },
 
       // Insert data into the processed database.
-      function (check, buffer, callback) {
+      function(check, buffer, callback) {
         console.log('[process-check.main] Inserting into the processed database');
         console.log(check);
-        console.log(buffer);
 
         processedDb.multipart.insert(
-          check,
-          [
-            {
-              name: check._id,
-              data: buffer,
-              content_type: 'image/jpg'
-            }
-          ],
+          check, [{
+            name: check._id,
+            data: buffer,
+            content_type: 'image/jpg'
+          }],
           check._id,
-          function (err, body, head) {
+          function(err, body, head) {
             console.log('err', err);
             console.log('body', body);
             console.log('head', head);
@@ -124,14 +120,14 @@ function main(params) {
 
     ],
 
-      function (err, result) {
-        if (err) {
-          console.log("[KO]", err);
-        } else {
-          console.log("[OK]");
-        }
-        whisk.done(null, err);
+    function(err, result) {
+      if (err) {
+        console.log("[KO]", err);
+      } else {
+        console.log("[OK]");
       }
+      whisk.done(null, err);
+    }
   );
 
   return whisk.async();
@@ -159,7 +155,7 @@ function asyncCallOcrParseAction(actionName, cloudantUser, cloudantPass, databas
       IMAGE_ID: check._id
     },
     blocking: true,
-    next: function (err, activation) {
+    next: function(err, activation) {
       if (err) {
         console.log(actionName, "[error]", error);
         return callback(err);
