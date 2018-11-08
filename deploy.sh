@@ -18,7 +18,7 @@
 source local.env
 
 # Capture the namespace where actions will be created
-WSK='wsk' # Set if not in your $PATH
+WSK='bx wsk' # Set if not in your $PATH
 CURRENT_NAMESPACE=`$WSK property get --namespace | sed -n -e 's/^whisk namespace//p' | tr -d '\t '`
 echo "Current namespace is $CURRENT_NAMESPACE."
 
@@ -45,7 +45,7 @@ function install() {
 
   docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
   sh -c "cd dockerSkeleton && ./buildAndPush.sh $DOCKER_USERNAME/parse-image"
-  $WSK action create --docker parse-image $DOCKER_USERNAME/parse-image
+  $WSK action create parse-image --docker $DOCKER_USERNAME/parse-image
 
   echo "Enabling rule"
   $WSK rule create deposit-check new-check-deposit cloudant-sequence
